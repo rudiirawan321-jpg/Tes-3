@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Take Harian - Sampoerna</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #b91c1c;
+      --primary-dark: #991b1b;
+      --border: #e5e7eb;
+      --ok-bg: #dcfce7;
+      --ok-tx: #166534;
+      --warn-bg: #fef3c7;
+      --warn-tx: #92400e;
+      --bad-bg: #fee2e2;
+      --bad-tx: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 12px;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      margin: 0;
+    }
+
+    .badge-brand {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input, select, button {
+      font-family: inherit;
+      font-size: 0.92rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input[type="number"] {
+      width: 100%;
+    }
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .grid-form {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 640px) {
+      .summary {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .stat .label {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    .stat .val {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #fff;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .item-meta {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .pill-ok { background: var(--ok-bg); color: var(--ok-tx); }
+    .pill-warn { background: var(--warn-bg); color: var(--warn-tx); }
+    .pill-bad { background: var(--bad-bg); color: var(--bad-tx); }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      background: #f9fafb;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .item-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    video {
+      width: 100%;
+      max-height: 240px;
+      border-radius: 10px;
+      background: #000;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px 8px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header-top">
+        <h1>Stock Take Harian Rokok</h1>
+        <span class="badge-brand">SAMPOERNA</span>
+      </div>
+      <div class="toolbar">
+        <label for="opnameDate" style="font-size:0.82rem;font-weight:600;">Tanggal:</label>
+        <input type="date" id="opnameDate" />
+        <button type="button" class="btn-secondary" id="loadSampleBtn">Isi Contoh Varian</button>
+        <button type="button" class="btn-secondary" id="exportCsvBtn">Export CSV</button>
+        <button type="button" class="btn-danger" id="clearDayBtn">Hapus Data Hari Ini</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="summary" id="summaryBox"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1rem;margin:0 0 10px;">Input / Update Varian</h2>
+      <form id="stockForm">
+        <div class="grid-form">
+          <div class="field">
+            <label for="barcode">Barcode / Kode SKU</label>
+            <input type="text" id="barcode" placeholder="Contoh: 899990001" required />
+          </div>
+
+          <div class="field">
+            <label for="variantName">Nama Varian Sampoerna</label>
+            <input type="text" id="variantName" placeholder="Contoh: Sampoerna Mild 16" required />
+          </div>
+
+          <div class="field">
+            <label for="unitPrice">Harga / Bungkus (Rp)</label>
+            <input type="number" id="unitPrice" min="0" step="100" value="35000" required />
+          </div>
+
+          <div class="field">
+            <label for="openingStock">Stok Awal</label>
+            <input type="number" id="openingStock" min="0" value="0" required />
+          </div>
+
+          <div class="field">
+            <label for="stockIn">Stok Masuk</label>
+            <input type="number" id="stockIn" min="0" value="0" required />
+          </div>
+
+          <div class="field">
+            <label for="stockOut">Terjual / Keluar</label>
+            <input type="number" id="stockOut" min="0" value="0" required />
+          </div>
+
+          <div class="field full">
+            <label for="physicalStock">Stok Fisik (Hasil Hitung Rak/Gudang)</label>
+            <input type="number" id="physicalStock" min="0" value="0" required />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Simpan Varian</button>
+          <button type="button" class="btn-secondary" id="scanBtn">Scan Barcode Kamera</button>
+          <button type="button" class="btn-secondary" id="resetFormBtn">Reset Form</button>
+        </div>
+        <video id="scannerVideo" playsinline></video>
+        <div id="scanStatus" class="item-meta" style="margin-top:6px;"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="header-top">
+        <h2 style="font-size:1rem;margin:0;">Daftar Stock Take</h2>
+        <input type="text" id="searchInput" placeholder="Cari varian / barcode..." style="max-width:220px;" />
+      </div>
+      <div id="stockList"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_PREFIX = "sampoerna_stock_take_v1_";
+    const dateInput = document.getElementById("opnameDate");
+    const form = document.getElementById("stockForm");
+    const listEl = document.getElementById("stockList");
+    const summaryEl = document.getElementById("summaryBox");
+    const searchInput = document.getElementById("searchInput");
+    const scanBtn = document.getElementById("scanBtn");
+    const videoEl = document.getElementById("scannerVideo");
+    const scanStatus = document.getElementById("scanStatus");
+
+    let stream = null;
+    let scanTimer = null;
+
+    const todayStr = () => new Date().toISOString().slice(0, 10);
+    dateInput.value = todayStr();
+
+    const getKey = () => STORAGE_PREFIX + (dateInput.value || todayStr());
+
+    const loadItems = () => {
+      try {
+        return JSON.parse(localStorage.getItem(getKey()) || "[]");
+      } catch {
+        return [];
+      }
+    };
+
+    const saveItems = (items) => {
+      localStorage.setItem(getKey(), JSON.stringify(items));
+    };
+
+    const formatRp = (num) => "Rp " + Number(num || 0).toLocaleString("id-ID");
+
+    const calcRow = (it) => {
+      const opening = Number(it.openingStock) || 0;
+      const stockIn = Number(it.stockIn) || 0;
+      const stockOut = Number(it.stockOut) || 0;
+      const physical = Number(it.physicalStock) || 0;
+      const price = Number(it.unitPrice) || 0;
+
+      const systemStock = opening + stockIn - stockOut;
+      const variance = physical - systemStock;
+      const varianceValue = variance * price;
+
+      return { systemStock, variance, varianceValue };
+    };
+
+    const renderSummary = (items) => {
+      let totalSystem = 0;
+      let totalPhysical = 0;
+      let totalVariance = 0;
+      let totalVarianceRp = 0;
+
+      for (const it of items) {
+        const c = calcRow(it);
+        totalSystem += c.systemStock;
+        totalPhysical += Number(it.physicalStock) || 0;
+        totalVariance += c.variance;
+        totalVarianceRp += c.varianceValue;
+      }
+
+      summaryEl.innerHTML = `
+        <div class="stat">
+          <div class="label">Total Varian</div>
+          <div class="val">${items.length}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Stok Sistem / Fisik</div>
+          <div class="val">${totalSystem} / ${totalPhysical}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Total Selisih (Bks)</div>
+          <div class="val">${totalVariance > 0 ? "+" + totalVariance : totalVariance}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Nilai Selisih</div>
+          <div class="val">${formatRp(totalVarianceRp)}</div>
+        </div>
+      `;
+    };
+
+    const renderList = () => {
+      const allItems = loadItems();
+      renderSummary(allItems);
+
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = allItems.filter((it) =>
+        it.variantName.toLowerCase().includes(q) ||
+        String(it.barcode).toLowerCase().includes(q)
+      );
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class="empty">Belum ada data stock take untuk tanggal ini.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((it) => {
+        const c = calcRow(it);
+        let pillClass = "pill-ok";
+        let statusText = "PAS (0)";
+
+        if (c.variance < 0) {
+          pillClass = "pill-bad";
+          statusText = `KURANG (${c.variance})`;
+        } else if (c.variance > 0) {
+          pillClass = "pill-warn";
+          statusText = `LEBIH (+${c.variance})`;
+        }
+
+        return `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <div class="item-title">${it.variantName}</div>
+                <div class="item-meta">Barcode: ${it.barcode} • Harga: ${formatRp(it.unitPrice)}</div>
+              </div>
+              <span class="pill ${pillClass}">${statusText}</span>
+            </div>
+            <div class="item-grid">
+              <div>Awal: <b>${it.openingStock}</b></div>
+              <div>Masuk: <b>+${it.stockIn}</b></div>
+              <div>Keluar: <b>-${it.stockOut}</b></div>
+              <div>Sistem: <b>${c.systemStock}</b></div>
+              <div>Fisik: <b>${it.physicalStock}</b></div>
+              <div>Selisih Rp: <b>${formatRp(c.varianceValue)}</b></div>
+            </div>
+            <div class="item-actions">
+              <span class="item-meta">Update: ${it.updatedAt || "-"}</span>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="btn-secondary" onclick="editItem('${it.barcode}')">Edit</button>
+                <button type="button" class="btn-danger" onclick="deleteItem('${it.barcode}')">Hapus</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    };
+
+    window.editItem = (barcode) => {
+      const found = loadItems().find((x) => x.barcode === barcode);
+      if (!found) return;
+      document.getElementById("barcode").value = found.barcode;
+      document.getElementById("variantName").value = found.variantName;
+      document.getElementById("unitPrice").value = found.unitPrice;
+      document.getElementById("openingStock").value = found.openingStock;
+      document.getElementById("stockIn").value = found.stockIn;
+      document.getElementById("stockOut").value = found.stockOut;
+      document.getElementById("physicalStock").value = found.physicalStock;
+      form.scrollIntoView({ behavior: "smooth" });
+    };
+
+    window.deleteItem = (barcode) => {
+      const next = loadItems().filter((x) => x.barcode !== barcode);
+      saveItems(next);
+      renderList();
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const barcode = document.getElementById("barcode").value.trim();
+      const variantName = document.getElementById("variantName").value.trim();
+      if (!barcode || !variantName) return;
+
+      const entry = {
+        barcode,
+        variantName,
+        unitPrice: Number(document.getElementById("unitPrice").value) || 0,
+        openingStock: Number(document.getElementById("openingStock").value) || 0,
+        stockIn: Number(document.getElementById("stockIn").value) || 0,
+        stockOut: Number(document.getElementById("stockOut").value) || 0,
+        physicalStock: Number(document.getElementById("physicalStock").value) || 0,
+        updatedAt: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      };
+
+      const items = loadItems();
+      const idx = items.findIndex((x) => x.barcode.toLowerCase() === barcode.toLowerCase());
+      if (idx >= 0) {
+        items[idx] = entry;
+      } else {
+        items.unshift(entry);
+      }
+
+      saveItems(items);
+      renderList();
+      form.reset();
+      document.getElementById("unitPrice").value = 35000;
+    });
+
+    document.getElementById("resetFormBtn").addEventListener("click", () => {
+      form.reset();
+      document.getElementById("unitPrice").value = 35000;
+    });
+
+    document.getElementById("loadSampleBtn").addEventListener("click", () => {
+      const samples = [
+        { barcode: "8999901", variantName: "Sampoerna Mild 16", unitPrice: 36000, openingStock: 40, stockIn: 10, stockOut: 18, physicalStock: 32, updatedAt: "08:30" },
+        { barcode: "8999902", variantName: "Sampoerna Mild Menthol 16", unitPrice: 36000, openingStock: 25, stockIn: 0, stockOut: 7, physicalStock: 17, updatedAt: "08:35" },
+        { barcode: "8999903", variantName: "Dji Sam Soe Kretek 12", unitPrice: 22000, openingStock: 30, stockIn: 12, stockOut: 15, physicalStock: 28, updatedAt: "08:40" },
+        { barcode: "8999904", variantName: "Dji Sam Soe Magnum Filter 16", unitPrice: 29000, openingStock: 20, stockIn: 5, stockOut: 9, physicalStock: 16, updatedAt: "08:45" }
+      ];
+      saveItems(samples);
+      renderList();
+    });
+
+    document.getElementById("clearDayBtn").addEventListener("click", () => {
+      if (confirm("Hapus semua data stock take pada tanggal terpilih?")) {
+        localStorage.removeItem(getKey());
+        renderList();
+      }
+    });
+
+    document.getElementById("exportCsvBtn").addEventListener("click", () => {
+      const items = loadItems();
+      if (!items.length) {
+        alert("Tidak ada data untuk di-export.");
+        return;
+      }
+      const headers = [
+        "Tanggal", "Barcode", "Varian", "Harga", "Stok Awal",
+        "Masuk", "Keluar", "Stok Sistem", "Stok Fisik", "Selisih", "Nilai Selisih"
+      ];
+      const rows = items.map((it) => {
+        const c = calcRow(it);
+        return [
+          dateInput.value,
+          `"${it.barcode}"`,
+          `"${it.variantName.replaceAll('"', '""')}"`,
+          it.unitPrice,
+          it.openingStock,
+          it.stockIn,
+          it.stockOut,
+          c.systemStock,
+          it.physicalStock,
+          c.variance,
+          c.varianceValue
+        ].join(",");
+      });
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `stock-take-sampoerna-${dateInput.value}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    const stopScanner = () => {
+      if (scanTimer) clearInterval(scanTimer);
+      scanTimer = null;
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+      }
+      videoEl.style.display = "none";
+    };
+
+    scanBtn.addEventListener("click", async () => {
+      if (stream) {
+        stopScanner();
+        scanStatus.textContent = "Kamera ditutup.";
+        return;
+      }
+      if (!("BarcodeDetector" in window) || !navigator.mediaDevices?.getUserMedia) {
+        scanStatus.textContent = "Kamera/BarcodeDetector tidak didukung di browser ini. Silakan ketik/input barcode manual.";
+        return;
+      }
+      try {
+        const detector = new BarcodeDetector({ formats: ["ean_13", "ean_8", "code_128", "code_39", "upc_a", "qr_code"] });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        videoEl.srcObject = stream;
+        videoEl.style.display = "block";
+        await videoEl.play();
+        scanStatus.textContent = "Arahkan kamera ke barcode bungkus rokok...";
+
+        scanTimer = setInterval(async () => {
+          try {
+            const codes = await detector.detect(videoEl);
+            if (codes.length > 0) {
+              const raw = codes[0].rawValue;
+              document.getElementById("barcode").value = raw;
+              const existing = loadItems().find((x) => x.barcode === raw);
+              if (existing) {
+                document.getElementById("variantName").value = existing.variantName;
+                document.getElementById("unitPrice").value = existing.unitPrice;
+              }
+              scanStatus.textContent = `Barcode terdeteksi: ${raw}`;
+              stopScanner();
+            }
+          } catch {}
+        }, 350);
+      } catch {
+        scanStatus.textContent = "Izin kamera ditolak atau tidak tersedia.";
+      }
+    });
+
+    dateInput.addEventListener("change", renderList);
+    searchInput.addEventListener("input", renderList);
+
+    renderList();
+  </script>
+</body>
+</html>
